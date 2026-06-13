@@ -1,0 +1,45 @@
+image:
+  repository: uzumaki420/devops-experts-project
+  tag: latest
+
+replicaCount: 2
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 5000
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 10
+  cpuUtilization: 50
+
+resources:
+  requests:
+    cpu: "100m"
+  limits:
+    cpu: "200m"
+
+config:
+  flaskDebug: "false"
+  appName: "devops-experts-project"
+  appVersion: "1.0.0"
+
+secret:
+  secretKey: ""
+
+probes:
+  liveness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 3
+
+cronjobs:
+  healthcheck:
+    schedule: "*/1 * * * *"
+  cleanup:
+    schedule: "0 * * * *"

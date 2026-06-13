@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-healthcheck
+spec:
+  schedule: {{ .Values.cronjobs.healthcheck.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: healthcheck
+              image: busybox
+              command:
+                - sh
+                - -c
+                - |
+                  RESPONSE=$(wget -qO- http://{{ .Release.Name }}-service/);
+                  if echo "$RESPONSE" | grep -q "Hello, Doron!"; then
+                    echo "Healthcheck passed";
+                  else
+                    echo "Healthcheck failed: $RESPONSE";
+                    exit 1;
+                  fi
+          restartPolicy: Never
