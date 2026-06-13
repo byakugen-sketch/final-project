@@ -91,7 +91,6 @@ python app.py
 | Port 5000 in use | macOS AirPlay Receiver holds port 5000 | Remapped host port to `5001` in `docker-compose.yml` |
 | Port mismatch in container | `app.py` bound Flask to `5001` but Dockerfile exposed `5000` | Changed `app.run` to `port=5000` in `app.py` |
 | Stale Docker cache | Rebuild didn't pick up port fix | Used `docker build --no-cache` / `docker compose up --build` |
-| pytest can't import `app` | `tests/` not in Python path | Added `conftest.py` inserting parent directory into `sys.path` |
 
 ---
 
