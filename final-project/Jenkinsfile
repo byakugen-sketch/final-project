@@ -13,7 +13,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ./final-project/phase-1"
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ./final-project"
             }
         }
 
@@ -38,7 +38,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh "helm upgrade --install flask-app ./final-project/phase-3 --set secret.secretKey=${IMAGE_TAG}"
+                sh "helm upgrade --install flask-app ./final-project/helm --set secret.secretKey=${IMAGE_TAG}"
             }
         }
     }
