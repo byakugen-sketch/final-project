@@ -3,10 +3,11 @@
 __pycache__/
 *.pyc
 venv/
+.idea/
 
 .env
 
 CLAUDE.md
 
 secret.yaml
-phase-3/jenkins/kubeconfig
+jenkins/kubeconfig
