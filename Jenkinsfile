@@ -38,7 +38,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh "helm upgrade --install flask-app ./helm --set secret.secretKey=${IMAGE_TAG}"
+                sh "helm upgrade --install flask-app ./helm --namespace flask-app --create-namespace --set secret.secretKey=${IMAGE_TAG}"
             }
         }
     }

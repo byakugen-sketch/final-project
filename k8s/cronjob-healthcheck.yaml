@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: flask-healthcheck
+  namespace: flask-app
 spec:
   schedule: "*/1 * * * *"
   jobTemplate:
