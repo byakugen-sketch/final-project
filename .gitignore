@@ -11,3 +11,5 @@ CLAUDE.md
 
 secret.yaml
 jenkins/kubeconfig
+
+RUNNING_SERVICES.md
