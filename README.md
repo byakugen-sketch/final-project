@@ -2,6 +2,8 @@
 
 A Python Flask web application containerized with Docker, deployed on Kubernetes using raw manifests and a Helm chart, and automated through a Jenkins CI/CD pipeline running inside Docker.
 
+> **Windows users:** Most commands in this guide use Bash syntax. On Windows, use [Git Bash](https://gitforwindows.org/) or [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) to run them as-is. Windows-specific alternatives are noted inline where the commands differ meaningfully.
+
 ---
 
 ## Project Structure
@@ -40,6 +42,7 @@ final-project/
     └── docker-compose.yml
 ```
 
+
 ---
 
 ## Application
@@ -63,7 +66,7 @@ Docker Hub image: **`uzumaki420/devops-experts-project:latest`**
 ## Part 1 — Docker
 
 ### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) — available for macOS, Windows, and Linux
 
 ### Run with Docker Compose
 ```bash
@@ -71,7 +74,12 @@ docker-compose up
 ```
 Enable debug mode:
 ```bash
+# macOS / Linux / Git Bash
 FLASK_DEBUG=true docker-compose up
+```
+```powershell
+# Windows PowerShell
+$env:FLASK_DEBUG="true"; docker-compose up
 ```
 Tear down:
 ```bash
@@ -113,8 +121,14 @@ pytest tests/ -v
 ## Part 2 — Kubernetes with Minikube
 
 ### Prerequisites
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/) — `brew install minikube`
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) — `brew install kubectl`
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+  - macOS: `brew install minikube`
+  - Windows: `winget install Kubernetes.minikube` or `choco install minikube`
+  - Linux: see [minikube docs](https://minikube.sigs.k8s.io/docs/start/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+  - macOS: `brew install kubectl`
+  - Windows: `winget install Kubernetes.kubectl` or `choco install kubernetes-cli`
+  - Linux: see [kubectl docs](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 
 ### Start the cluster
 ```bash
@@ -140,9 +154,16 @@ kubectl get nodes
 
 Generate a base64-encoded key and create the file:
 ```bash
+# macOS / Linux / Git Bash
 python3 -c "import secrets, base64; print(base64.b64encode(secrets.token_hex(32).encode()).decode())"
 cp k8s/secret.yaml.example k8s/secret.yaml
 # Edit k8s/secret.yaml and replace <base64-encoded-value> with the generated output
+```
+```powershell
+# Windows PowerShell (python3 may be python or py depending on your install)
+python -c "import secrets, base64; print(base64.b64encode(secrets.token_hex(32).encode()).decode())"
+copy k8s\secret.yaml.example k8s\secret.yaml
+# Edit k8s\secret.yaml and replace <base64-encoded-value> with the generated output
 ```
 
 ### Deploy — apply in this order
@@ -182,8 +203,8 @@ kubectl get cronjobs
 
 **`cronjob-cleanup.yaml`** — runs every hour, clears `/tmp` inside a busybox container.
 
-### Access the app (macOS with Docker driver)
-On macOS, LoadBalancer services need a tunnel to get an external IP:
+### Access the app (macOS and Windows with Docker driver)
+On macOS and Windows, LoadBalancer services need a tunnel to get an external IP:
 ```bash
 # Run in a separate terminal — keep it open
 minikube tunnel
@@ -214,7 +235,10 @@ minikube stop
 ## Part 3 — Helm & Jenkins CI/CD
 
 ### Prerequisites
-- [Helm](https://helm.sh/docs/intro/install/) — `brew install helm`
+- [Helm](https://helm.sh/docs/intro/install/)
+  - macOS: `brew install helm`
+  - Windows: `winget install Helm.Helm` or `choco install kubernetes-helm`
+  - Linux: see [Helm docs](https://helm.sh/docs/intro/install/)
 - Minikube running with `minikube tunnel` active in a separate terminal
 - Docker Hub account and access token
 
@@ -288,7 +312,12 @@ Push and Deploy only run if all previous stages pass.
 The Jenkins container needs access to the Minikube cluster. Copy the kubeconfig and modify it so Jenkins can reach the cluster from inside Docker:
 
 ```bash
+# macOS / Linux / Git Bash
 cp ~/.kube/config jenkins/kubeconfig
+```
+```powershell
+# Windows PowerShell
+copy "$HOME\.kube\config" jenkins\kubeconfig
 ```
 
 Then edit `jenkins/kubeconfig` and make two changes in the cluster entry:
@@ -296,8 +325,14 @@ Then edit `jenkins/kubeconfig` and make two changes in the cluster entry:
 2. Remove `certificate-authority-data` and add `insecure-skip-tls-verify: true`
 3. Replace `client-certificate` and `client-key` file paths with embedded base64 values:
    ```bash
+   # macOS / Linux / Git Bash
    cat ~/.minikube/profiles/minikube/client.crt | base64
    cat ~/.minikube/profiles/minikube/client.key | base64
+   ```
+   ```powershell
+   # Windows PowerShell
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.minikube\profiles\minikube\client.crt"))
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.minikube\profiles\minikube\client.key"))
    ```
    Use `client-certificate-data` and `client-key-data` as the field names.
 
