@@ -16,8 +16,8 @@ spec:
                 - sh
                 - -c
                 - |
-                  RESPONSE=$(wget -qO- http://flask-service/);
-                  if echo "$RESPONSE" | grep -q "Hello, Doron!"; then
+                  RESPONSE=$(wget -qO- http://flask-service/health);
+                  if echo "$RESPONSE" | grep -q "healthy"; then
                     echo "Healthcheck passed";
                   else
                     echo "Healthcheck failed: $RESPONSE";

@@ -1,11 +1,42 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import os
+import logging
+import time
+from pythonjsonlogger import jsonlogger
 
 app = Flask(__name__)
 
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+handler.setFormatter(jsonlogger.JsonFormatter("%(asctime)s %(levelname)s %(message)s"))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+@app.after_request
+def log_request(response):
+    logger.info(
+        "request",
+        extra={
+            "method": request.method,
+            "path": request.path,
+            "status": response.status_code,
+            "remote_addr": request.remote_addr,
+        },
+    )
+    return response
+
 @app.route("/")
 def home():
-    return jsonify({"message": "Hello, Doron!"}), 200
+    return """<!DOCTYPE html>
+<html>
+<head>
+  <title>Flask App</title>
+</head>
+<body style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#111;color:#fff;font-family:sans-serif;">
+  <img src="/static/hal9000.png" style="width:320px;border-radius:50%;margin-bottom:32px;">
+  <h1 style="font-size:2rem;letter-spacing:0.05em;">Hello Doron, how can I help you today?</h1>
+</body>
+</html>""", 200
 
 @app.route("/health")
 def health():
