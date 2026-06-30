@@ -302,11 +302,12 @@ Jenkins is available at **http://localhost:8080**
 |-------|-------------|
 | Checkout | Pulls the latest code from GitHub |
 | Build | Runs `docker build` from the project root |
+| Scan | Runs Trivy to scan the image for CRITICAL/HIGH CVEs — fails the pipeline if any are found |
 | Test | Runs `pytest` inside the freshly built container |
 | Push | Logs in to Docker Hub and pushes the image |
 | Deploy | Runs `helm upgrade --install` against the Minikube cluster |
 
-Push and Deploy only run if all previous stages pass.
+Push and Deploy only run if all previous stages pass. Trivy runs as a Docker container (`aquasec/trivy`) — no installation required on Jenkins.
 
 ### Kubeconfig setup for Jenkins
 The Jenkins container needs access to the Minikube cluster. Copy the kubeconfig and modify it so Jenkins can reach the cluster from inside Docker:

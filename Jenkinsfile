@@ -17,6 +17,19 @@ pipeline {
             }
         }
 
+        stage('Scan') {
+            steps {
+                sh '''
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      aquasec/trivy image \
+                      --exit-code 1 \
+                      --severity CRITICAL,HIGH \
+                      --ignore-unfixed \
+                      uzumaki420/devops-experts-project:latest
+                '''
+            }
+        }
         stage('Test') {
             steps {
                 sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m pytest tests/ -v"
