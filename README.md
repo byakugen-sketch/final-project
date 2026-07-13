@@ -378,6 +378,118 @@ Then edit `jenkins/kubeconfig` and make two changes in the cluster entry:
 
 ---
 
+## Part 4 — Monitoring (Prometheus, Grafana, Loki)
+
+### Prerequisites
+- Minikube running, with Jenkins up and connected to the `minikube` Docker network (see [Jenkins setup](#jenkins-setup))
+- Helm
+
+### Add the Helm repos
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+```
+
+### Create the monitoring namespace
+```bash
+kubectl apply -f monitoring/namespace.yml
+```
+
+### Install Prometheus
+Prometheus scrapes Jenkins metrics over the `minikube` Docker network, so the scrape target has to match whatever IP Docker assigned the Jenkins container — that address isn't fixed across machines or restarts. `prometheus-values.yaml` uses a `<JENKINS_IP>` placeholder for this reason; resolve it and substitute in before installing:
+
+```bash
+# macOS / Linux / Git Bash
+JENKINS_IP=$(docker inspect jenkins-jenkins-1 --format '{{ .NetworkSettings.Networks.minikube.IPAddress }}')
+sed "s/<JENKINS_IP>/$JENKINS_IP/" prometheus-values.yaml > /tmp/prometheus-values.yaml
+helm install prometheus prometheus-community/prometheus --namespace monitoring -f /tmp/prometheus-values.yaml
+```
+```powershell
+# Windows PowerShell
+$JENKINS_IP = docker inspect jenkins-jenkins-1 --format '{{ .NetworkSettings.Networks.minikube.IPAddress }}'
+(Get-Content prometheus-values.yaml) -replace '<JENKINS_IP>', $JENKINS_IP | Set-Content $env:TEMP\prometheus-values.yaml
+helm install prometheus prometheus-community/prometheus --namespace monitoring -f $env:TEMP\prometheus-values.yaml
+```
+
+> If the Jenkins container is ever recreated, its IP on the `minikube` network can change — rerun the substitution and `helm upgrade` with the regenerated file.
+
+### Install Grafana
+```bash
+helm install grafana grafana/grafana --namespace monitoring
+```
+Retrieve the auto-generated admin password (username is `admin`):
+```bash
+# macOS / Linux / Git Bash
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
+```
+```powershell
+# Windows PowerShell
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}")))
+```
+
+### Install Loki
+Installed in SingleBinary mode with the gateway disabled — the gateway causes anti-affinity issues on a single-node Minikube cluster:
+```bash
+helm install loki grafana/loki --namespace monitoring \
+  --set loki.auth_enabled=false \
+  --set loki.useTestSchema=true \
+  --set deploymentMode=SingleBinary \
+  --set loki.commonConfig.replication_factor=1 \
+  --set loki.storage.type=filesystem \
+  --set singleBinary.replicas=1 \
+  --set chunksCache.enabled=false \
+  --set resultsCache.enabled=false \
+  --set gateway.enabled=false \
+  --set read.replicas=0 \
+  --set write.replicas=0 \
+  --set backend.replicas=0
+```
+
+### Install Promtail
+Promtail is a DaemonSet that tails every pod's logs across all namespaces and ships them to Loki. Its pipeline parses the flask-app JSON log fields (`level`, `method`, `path`, `status`, `remote_addr`) into labels:
+```bash
+helm install promtail grafana/promtail --namespace monitoring -f promtail-values.yaml
+```
+
+### Access Prometheus & Grafana
+```bash
+# Prometheus
+export POD_NAME=$(kubectl get pods --namespace monitoring -l "app.kubernetes.io/name=prometheus,app.kubernetes.io/instance=prometheus" -o jsonpath="{.items[0].metadata.name}")
+kubectl --namespace monitoring port-forward $POD_NAME 9090 &
+
+# Grafana
+export POD_NAME=$(kubectl get pods --namespace monitoring -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana" -o jsonpath="{.items[0].metadata.name}")
+kubectl --namespace monitoring port-forward $POD_NAME 3000 &
+```
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+### Add Grafana datasources
+In Grafana: **Connections → Data sources → Add data source**
+- **Prometheus** — URL: `http://prometheus-server.monitoring.svc.cluster.local`
+- **Loki** — URL: `http://loki.monitoring.svc.cluster.local:3100`
+
+### Import dashboards
+**Dashboards → New → Import → Upload JSON**, once for each file in `monitoring/`:
+
+| File | Title | Panels |
+|------|-------|--------|
+| `flask-dashboard.json` | Flask App | Running Pods, Pod Restarts, Log Count, Error Logs, CPU Usage, Memory Usage, Log Rate Over Time, Requests by Path, Live Logs |
+| `cpu-dashboard.json` | Node Resources | CPU Usage per Node, Storage Used per Node |
+| `jenkins-dashboard.json` | Jenkins Pipeline | Jenkins Up, Last Build Result, Health Score, Total Builds, Successful Builds, Queue Size, Build Duration, Build Success vs Failure |
+
+CPU/memory/running-pods queries in `flask-dashboard.json` filter by `pod=~"flask-app-deployment-.*"` to exclude CronJob pods from the metrics.
+
+### Useful LogQL queries
+```
+{namespace="flask-app"}                          # all logs
+{namespace="flask-app", status="200"}            # by status
+{namespace="flask-app"} | json | line_format "{{.levelname}} {{.method}} {{.path}} -> {{.status}}"
+```
+
+---
+
 ## Known Issues & Fixes
 
 | Issue | Fix |

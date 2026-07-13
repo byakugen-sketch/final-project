@@ -1,0 +1,21 @@
+config:
+  clients:
+    - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+  snippets:
+    pipelineStages:
+      - cri: {}
+      - match:
+          selector: '{namespace="flask-app"}'
+          stages:
+            - json:
+                expressions:
+                  level: levelname
+                  method: method
+                  path: path
+                  status: status
+                  remote_addr: remote_addr
+            - labels:
+                level:
+                method:
+                path:
+                status:

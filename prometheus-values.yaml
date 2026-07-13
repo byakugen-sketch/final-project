@@ -1,0 +1,6 @@
+extraScrapeConfigs: |
+  - job_name: jenkins
+    metrics_path: /prometheus/
+    static_configs:
+      - targets:
+          - <JENKINS_IP>:8080
