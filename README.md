@@ -233,6 +233,32 @@ kubectl get jobs                     # completed CronJob runs
 kubectl logs -l app=flask-app        # logs from all pods
 ```
 
+### Testing the HPA
+Generate CPU load against the service so the HPA has a reason to scale. The CPU limit is only `200m` per pod, so even a modest request rate is enough to push utilisation past the 50% threshold.
+
+Run a load generator pod that hammers the service in a tight loop:
+```bash
+kubectl run load-generator --image=busybox --restart=Never -- \
+  /bin/sh -c "while true; do wget -q -O- http://flask-service; done"
+```
+
+Watch the HPA react in a separate terminal:
+```bash
+kubectl get hpa -w
+```
+`TARGETS` should climb well above `50%`, and `REPLICAS` should increase from `2` toward `10` as the average CPU stays high.
+
+Watch the pods scale in another terminal:
+```bash
+kubectl get pods -w
+```
+
+Once you've seen it scale up, stop the load and clean up:
+```bash
+kubectl delete pod load-generator
+```
+Replicas scale back down to `2` a few minutes after CPU utilisation drops — the HPA has a default cooldown before scaling down to avoid flapping.
+
 ### Tear down
 ```bash
 kubectl delete -f k8s/
