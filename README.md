@@ -8,7 +8,7 @@ A Python Flask web application containerized with Docker, deployed on Kubernetes
 
 ## End-to-End Flow
 
-![CI/CD and deployment flow diagram](flow-diagram.svg)
+![CI/CD and deployment flow diagram](docs/flow-diagram.svg)
 
 ---
 
@@ -21,6 +21,8 @@ final-project/
 ├── Dockerfile                    # Docker image definition
 ├── docker-compose.yml            # Local development setup
 ├── Jenkinsfile                   # CI/CD pipeline definition
+├── static/
+│   └── hal9000.png               # Homepage image
 ├── tests/
 │   ├── conftest.py               # Pytest path configuration
 │   └── test_app.py               # Endpoint tests
@@ -43,9 +45,18 @@ final-project/
 │       ├── secret.yaml
 │       ├── cronjob-healthcheck.yaml
 │       └── cronjob-cleanup.yaml
-└── jenkins/                      # Jenkins Docker setup
-    ├── Dockerfile
-    └── docker-compose.yml
+├── jenkins/                      # Jenkins Docker setup
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── monitoring/                   # Prometheus/Grafana/Loki config and dashboards
+│   ├── namespace.yml
+│   ├── prometheus-values.yaml
+│   ├── promtail-values.yaml
+│   ├── flask-dashboard.json
+│   ├── cpu-dashboard.json
+│   └── jenkins-dashboard.json
+└── docs/
+    └── flow-diagram.svg          # End-to-end flow diagram used in this README
 ```
 
 
@@ -397,18 +408,18 @@ kubectl apply -f monitoring/namespace.yml
 ```
 
 ### Install Prometheus
-Prometheus scrapes Jenkins metrics over the `minikube` Docker network, so the scrape target has to match whatever IP Docker assigned the Jenkins container — that address isn't fixed across machines or restarts. `prometheus-values.yaml` uses a `<JENKINS_IP>` placeholder for this reason; resolve it and substitute in before installing:
+Prometheus scrapes Jenkins metrics over the `minikube` Docker network, so the scrape target has to match whatever IP Docker assigned the Jenkins container — that address isn't fixed across machines or restarts. `monitoring/prometheus-values.yaml` uses a `<JENKINS_IP>` placeholder for this reason; resolve it and substitute in before installing:
 
 ```bash
 # macOS / Linux / Git Bash
 JENKINS_IP=$(docker inspect jenkins-jenkins-1 --format '{{ .NetworkSettings.Networks.minikube.IPAddress }}')
-sed "s/<JENKINS_IP>/$JENKINS_IP/" prometheus-values.yaml > /tmp/prometheus-values.yaml
+sed "s/<JENKINS_IP>/$JENKINS_IP/" monitoring/prometheus-values.yaml > /tmp/prometheus-values.yaml
 helm install prometheus prometheus-community/prometheus --namespace monitoring -f /tmp/prometheus-values.yaml
 ```
 ```powershell
 # Windows PowerShell
 $JENKINS_IP = docker inspect jenkins-jenkins-1 --format '{{ .NetworkSettings.Networks.minikube.IPAddress }}'
-(Get-Content prometheus-values.yaml) -replace '<JENKINS_IP>', $JENKINS_IP | Set-Content $env:TEMP\prometheus-values.yaml
+(Get-Content monitoring/prometheus-values.yaml) -replace '<JENKINS_IP>', $JENKINS_IP | Set-Content $env:TEMP\prometheus-values.yaml
 helm install prometheus prometheus-community/prometheus --namespace monitoring -f $env:TEMP\prometheus-values.yaml
 ```
 
@@ -449,7 +460,7 @@ helm install loki grafana/loki --namespace monitoring \
 ### Install Promtail
 Promtail is a DaemonSet that tails every pod's logs across all namespaces and ships them to Loki. Its pipeline parses the flask-app JSON log fields (`level`, `method`, `path`, `status`, `remote_addr`) into labels:
 ```bash
-helm install promtail grafana/promtail --namespace monitoring -f promtail-values.yaml
+helm install promtail grafana/promtail --namespace monitoring -f monitoring/promtail-values.yaml
 ```
 
 ### Access Prometheus & Grafana
