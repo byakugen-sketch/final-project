@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 2040" font-family="Georgia, 'Times New Roman', Times, serif">
+  <defs>
+    <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7f8c9a"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2874a6"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="2040" fill="#eef1f7"/>
+
+  <text x="700" y="40" text-anchor="middle" font-size="28" font-weight="bold" fill="#2c3e50">CI/CD &amp; Deployment Flow</text>
+
+  <!-- Top row icons -->
+  <text x="170" y="90" text-anchor="middle" font-size="42">🧑‍💻</text>
+  <text x="500" y="90" text-anchor="middle" font-size="42">🐙</text>
+  <text x="890" y="90" text-anchor="middle" font-size="42">⚙️</text>
+
+  <!-- Top row boxes -->
+  <rect x="60" y="130" width="220" height="90" rx="16" fill="#fde9d9" stroke="#e2725b" stroke-width="2"/>
+  <text x="170" y="180" text-anchor="middle" font-size="20">Developer</text>
+
+  <rect x="380" y="130" width="240" height="90" rx="16" fill="#fff3b8" stroke="#d4ac0d" stroke-width="2"/>
+  <text x="500" y="172" text-anchor="middle" font-size="20">GitHub Repo</text>
+  <text x="500" y="194" text-anchor="middle" font-size="13" fill="#555">main branch</text>
+
+  <rect x="760" y="130" width="260" height="90" rx="16" fill="#f1c6e7" stroke="#7d3c98" stroke-width="2"/>
+  <text x="890" y="172" text-anchor="middle" font-size="20">Jenkins Server</text>
+  <text x="890" y="194" text-anchor="middle" font-size="13" fill="#555">running in Docker</text>
+
+  <!-- Arrows: Developer -> GitHub -> Jenkins -->
+  <line x1="280" y1="175" x2="374" y2="175" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="290" y="150" width="80" height="20" fill="#eef1f7"/>
+  <text x="330" y="165" text-anchor="middle" font-size="13" fill="#333">git push</text>
+
+  <line x1="620" y1="175" x2="754" y2="175" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="630" y="150" width="120" height="20" fill="#eef1f7"/>
+  <text x="690" y="165" text-anchor="middle" font-size="13" fill="#333">webhook trigger</text>
+
+  <!-- Jenkins -> Checkout -->
+  <line x1="890" y1="220" x2="890" y2="264" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <!-- Pipeline stage chain -->
+  <rect x="760" y="270" width="260" height="90" rx="16" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="890" y="322" text-anchor="middle" font-size="19">Checkout</text>
+  <line x1="890" y1="360" x2="890" y2="404" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <rect x="760" y="410" width="260" height="90" rx="16" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="890" y="455" text-anchor="middle" font-size="19">Build</text>
+  <text x="890" y="477" text-anchor="middle" font-size="12" fill="#555">docker build (multi-stage)</text>
+  <line x1="890" y1="500" x2="890" y2="544" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <rect x="760" y="550" width="260" height="90" rx="16" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="890" y="595" text-anchor="middle" font-size="19">Scan</text>
+  <text x="890" y="617" text-anchor="middle" font-size="12" fill="#555">Trivy: CRITICAL/HIGH CVEs</text>
+  <line x1="890" y1="640" x2="890" y2="684" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <rect x="760" y="690" width="260" height="90" rx="16" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="890" y="735" text-anchor="middle" font-size="19">Test</text>
+  <text x="890" y="757" text-anchor="middle" font-size="12" fill="#555">pytest inside container</text>
+  <line x1="890" y1="780" x2="890" y2="824" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <rect x="760" y="830" width="260" height="90" rx="16" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="890" y="875" text-anchor="middle" font-size="19">Push</text>
+  <text x="890" y="897" text-anchor="middle" font-size="12" fill="#555">to Docker Hub</text>
+  <line x1="890" y1="920" x2="890" y2="964" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <rect x="760" y="970" width="260" height="90" rx="16" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="890" y="1015" text-anchor="middle" font-size="19">Deploy</text>
+  <text x="890" y="1037" text-anchor="middle" font-size="12" fill="#555">helm upgrade --install</text>
+
+  <!-- Pipeline Stops sink -->
+  <rect x="380" y="590" width="260" height="90" rx="4" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+  <text x="510" y="630" text-anchor="middle" font-size="18" font-weight="bold" fill="#c0392b">✕ Pipeline Stops</text>
+  <text x="510" y="653" text-anchor="middle" font-size="12" fill="#555">Push &amp; Deploy skipped</text>
+
+  <line x1="760" y1="600" x2="646" y2="618" stroke="#c0392b" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#arrowRed)"/>
+  <rect x="655" y="588" width="50" height="18" fill="#eef1f7"/>
+  <text x="680" y="602" text-anchor="middle" font-size="12" fill="#c0392b">fails</text>
+
+  <line x1="760" y1="740" x2="646" y2="660" stroke="#c0392b" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#arrowRed)"/>
+  <rect x="655" y="700" width="50" height="18" fill="#eef1f7"/>
+  <text x="680" y="714" text-anchor="middle" font-size="12" fill="#c0392b">fails</text>
+
+  <!-- Docker Hub -->
+  <text x="1240" y="775" text-anchor="middle" font-size="34">🐳</text>
+  <rect x="1120" y="785" width="240" height="100" rx="4" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+  <text x="1240" y="828" text-anchor="middle" font-size="18" font-weight="bold">Docker Hub</text>
+  <text x="1240" y="850" text-anchor="middle" font-size="10.5" fill="#555">uzumaki420/devops-experts-project</text>
+
+  <line x1="1020" y1="875" x2="1114" y2="838" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="1030" y="845" width="90" height="18" fill="#eef1f7"/>
+  <text x="1075" y="859" text-anchor="middle" font-size="12" fill="#333">docker push</text>
+
+  <!-- Helm Chart -->
+  <text x="890" y="1080" text-anchor="middle" font-size="34">📦</text>
+  <rect x="760" y="1110" width="260" height="90" rx="16" fill="#d6eaf8" stroke="#2874a6" stroke-width="2"/>
+  <text x="890" y="1150" text-anchor="middle" font-size="19">Helm Chart</text>
+  <text x="890" y="1172" text-anchor="middle" font-size="12" fill="#555">./helm — values.yaml</text>
+
+  <line x1="890" y1="1060" x2="890" y2="1104" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <!-- Docker Hub image pull into cluster -->
+  <line x1="1240" y1="885" x2="1180" y2="1244" stroke="#2874a6" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#arrowBlue)"/>
+  <rect x="1150" y="1050" width="90" height="18" fill="#eef1f7"/>
+  <text x="1195" y="1064" text-anchor="middle" font-size="12" fill="#2874a6">image pull</text>
+
+  <!-- Helm -> cluster -->
+  <line x1="890" y1="1200" x2="890" y2="1244" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="900" y="1214" width="140" height="18" fill="#eef1f7"/>
+  <text x="970" y="1228" text-anchor="middle" font-size="12" fill="#333">applies manifests</text>
+
+  <!-- Kubernetes cluster container -->
+  <rect x="100" y="1250" width="1200" height="580" rx="20" fill="#f7fafc" stroke="#5dade2" stroke-width="2" stroke-dasharray="8,6"/>
+  <text x="130" y="1287" font-size="16" font-weight="bold" fill="#2874a6">Kubernetes Cluster (Minikube) — namespace: flask-app</text>
+  <text x="1240" y="1292" text-anchor="middle" font-size="28">☸️</text>
+
+  <!-- Row 1: ConfigMap, Secret, HPA -->
+  <rect x="140" y="1330" width="190" height="80" rx="12" fill="#fff3b8" stroke="#d4ac0d" stroke-width="2"/>
+  <text x="235" y="1376" text-anchor="middle" font-size="16">ConfigMap</text>
+
+  <rect x="360" y="1330" width="190" height="80" rx="12" fill="#fff3b8" stroke="#d4ac0d" stroke-width="2"/>
+  <text x="455" y="1376" text-anchor="middle" font-size="16">Secret</text>
+
+  <rect x="580" y="1330" width="220" height="80" rx="12" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="690" y="1370" text-anchor="middle" font-size="16">HPA</text>
+  <text x="690" y="1390" text-anchor="middle" font-size="11" fill="#555">scales 2–10 @ 50% CPU</text>
+
+  <!-- Row 2: Deployment, Service -->
+  <rect x="140" y="1460" width="280" height="90" rx="12" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="280" y="1500" text-anchor="middle" font-size="17">Deployment</text>
+  <text x="280" y="1522" text-anchor="middle" font-size="12" fill="#555">2–10 replicas</text>
+
+  <rect x="460" y="1460" width="260" height="90" rx="12" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="590" y="1500" text-anchor="middle" font-size="17">Service</text>
+  <text x="590" y="1522" text-anchor="middle" font-size="12" fill="#555">LoadBalancer :80 → 5000</text>
+
+  <line x1="235" y1="1410" x2="260" y2="1460" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <line x1="455" y1="1410" x2="310" y2="1460" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <line x1="690" y1="1410" x2="400" y2="1460" stroke="#2874a6" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#arrowBlue)"/>
+  <rect x="490" y="1420" width="55" height="18" fill="#f7fafc"/>
+  <text x="517" y="1434" text-anchor="middle" font-size="11" fill="#2874a6">scales</text>
+
+  <!-- Row 3: Flask Pods -->
+  <rect x="280" y="1600" width="260" height="80" rx="12" fill="#d5f5e3" stroke="#229954" stroke-width="2"/>
+  <text x="410" y="1648" text-anchor="middle" font-size="18" font-weight="bold">Flask Pods</text>
+
+  <line x1="280" y1="1550" x2="370" y2="1600" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <line x1="590" y1="1550" x2="450" y2="1600" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <!-- Row 4: CronJobs -->
+  <rect x="140" y="1720" width="280" height="80" rx="12" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="280" y="1758" text-anchor="middle" font-size="14">CronJob: healthcheck</text>
+  <text x="280" y="1778" text-anchor="middle" font-size="11" fill="#555">every 1 minute</text>
+
+  <rect x="460" y="1720" width="260" height="80" rx="12" fill="#f5d9f0" stroke="#8e44ad" stroke-width="2"/>
+  <text x="590" y="1758" text-anchor="middle" font-size="14">CronJob: cleanup</text>
+  <text x="590" y="1778" text-anchor="middle" font-size="11" fill="#555">every 1 hour</text>
+
+  <polyline points="270,1720 270,1585 560,1585 560,1550" fill="none" stroke="#2874a6" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#arrowBlue)"/>
+  <rect x="355" y="1576" width="90" height="18" fill="#f7fafc"/>
+  <text x="400" y="1590" text-anchor="middle" font-size="11" fill="#2874a6">GET /health</text>
+
+  <!-- Flask Pods -> End User -->
+  <polyline points="540,1640 1120,1640 1120,1894" fill="none" stroke="#7f8c9a" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="1075" y="1760" width="110" height="18" fill="#eef1f7"/>
+  <text x="1130" y="1774" text-anchor="middle" font-size="12" fill="#333">HTTP requests</text>
+
+  <!-- End User -->
+  <text x="1120" y="1875" text-anchor="middle" font-size="36">🌐</text>
+  <rect x="1000" y="1900" width="240" height="90" rx="16" fill="#fde9d9" stroke="#e2725b" stroke-width="2"/>
+  <text x="1120" y="1953" text-anchor="middle" font-size="19">End User</text>
+</svg>

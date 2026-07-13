@@ -6,6 +6,12 @@ A Python Flask web application containerized with Docker, deployed on Kubernetes
 
 ---
 
+## End-to-End Flow
+
+![CI/CD and deployment flow diagram](flow-diagram.svg)
+
+---
+
 ## Project Structure
 
 ```
@@ -112,6 +118,9 @@ pytest tests/ -v
 ```
 
 ### Dockerfile design decisions
+- **Multi-stage build** — a `builder` stage installs dependencies, the final stage copies only the installed packages. Build tools (`pip`, `setuptools`, `wheel`) are stripped from the final image, eliminating their CVEs from Trivy scans
+- **`pip install --target=/install`** — installs packages into an isolated directory so only the app's runtime dependencies are copied into the final image, not the base image's pre-installed build tools
+- **`RUN pip uninstall -y setuptools wheel`** — explicitly removes vulnerable build tools that `python:3.11-slim` ships with, since they are not needed at runtime
 - **`python:3.11-slim`** base image keeps the final image small
 - Dependencies are installed before copying app code so Docker can cache the `pip install` layer and skip it on every code change
 - Files are copied explicitly (`COPY app.py .`) rather than using `COPY . .` to avoid accidentally including sensitive or unnecessary files in the image
